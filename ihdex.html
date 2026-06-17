@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>夏綠坊｜線上版訂單</title>
+  <style>
+    :root {
+      --mint: #b9ebe3;
+      --mint-dark: #4aa89f;
+      --paper: #f7f5ef;
+      --ink: #24343a;
+      --muted: #6b7f84;
+      --line: #e6ecec;
+      --shadow: 0 16px 40px rgba(66,111,108,.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+      background: linear-gradient(180deg, #ece7dd 0%, var(--paper) 100%);
+      color: var(--ink);
+    }
+    .page { max-width: 1280px; margin: 0 auto; padding: 24px; }
+    .hero {
+      background: linear-gradient(135deg, rgba(185,235,227,.95), rgba(218,247,242,.95));
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 28px;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 20px;
+      align-items: center;
+    }
+    .brand h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2.4rem, 4vw, 4.2rem);
+      letter-spacing: 4px;
+      color: #2f837c;
+    }
+    .brand p { margin: 6px 0; color: #45666a; }
+    .hero-badges {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    .badge {
+      background: rgba(255,255,255,.75);
+      color: #41656a;
+      border: 1px solid rgba(74,168,159,.2);
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: .95rem;
+    }
+    .contact-card {
+      background: rgba(255,255,255,.92);
+      border-radius: 24px;
+      padding: 24px;
+      border: 1px solid rgba(74,168,159,.15);
+    }
+    .contact-card h2 {
+      margin: 0 0 8px;
+      font-size: 1.1rem;
+      color: var(--muted);
+    }
+    .phone {
+      font-size: clamp(2rem, 3vw, 3rem);
+      font-weight: 800;
+      color: #2d8c84;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+      gap: 24px;
+      margin-top: 24px;
+      align-items: start;
+    }
+    .menu-panel, .order-panel {
+      background: rgba(255,255,255,.94);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+    .section-title {
+      margin: 0 0 18px;
+      font-size: 1.5rem;
+      color: #2c6967;
+    }
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .category {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .category-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #fff;
+      padding: 12px 16px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .sizes {
+      font-size: .85rem;
+      background: rgba(255,255,255,.2);
+      border-radius: 999px;
+      padding: 4px 10px;
+    }
+    .drink-list {
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+    .drink-btn {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 16px;
+      padding: 12px;
+      text-align: left;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+    .drink-btn:hover,
+    .drink-btn.active {
+      transform: translateY(-1px);
+      border-color: var(--mint-dark);
+      box-shadow: 0 8px 18px rgba(74,168,159,.14);
+      background: #f6fffd;
+    }
+    .drink-btn strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 1rem;
+      color: #22343a;
+    }
+    .price-row {
+      display: flex;
+      gap: 12px;
+      color: var(--muted);
+      font-size: .92rem;
+      flex-wrap: wrap;
+    }
+    .order-panel { position: sticky; top: 18px; }
+    .selected-drink {
+      padding: 16px;
+      background: #f8fdfc;
+      border: 1px dashed #b8d7d2;
+      border-radius: 18px;
+      margin-bottom: 18px;
+    }
+    .selected-drink h3 {
+      margin: 0 0 8px;
+      color: #2b6564;
+    }
+    .form-block { margin-bottom: 18px; }
+    .block-title {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #35595e;
+    }
+    .option-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .option-chip {
+      position: relative;
+    }
+    .option-chip input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .option-chip span {
+      display: inline-block;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid #d7e6e2;
+      background: #fff;
+      color: #45666a;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+    .option-chip input:checked + span {
+      background: #2f8c84;
+      color: #fff;
+      border-color: #2f8c84;
+    }
+    .addons {
+      display: grid;
+      gap: 10px;
+    }
+    .addon-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid #e4ecea;
+      border-radius: 14px;
+      padding: 12px 14px;
+    }
+    .addon-item label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .qty-row input,
+    textarea {
+      width: 100%;
+      border: 1px solid #d9e5e3;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font: inherit;
+      background: #fff;
+    }
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+    .summary {
+      background: #f5fbfa;
+      border-radius: 18px;
+      padding: 16px;
+      border: 1px solid #dfeceb;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
+      color: #49686d;
+    }
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #d9e7e4;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #2f6763;
+    }
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 18px;
+    }
+    button {
+      border: none;
+      border-radius: 16px;
+      padding: 14px 18px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .primary {
+      background: linear-gradient(135deg, #35a898, #57c9b3);
+      color: #fff;
+    }
+    .secondary {
+      background: #eef4f3;
+      color: #44676d;
+    }
+    .notice {
+      margin-top: 18px;
+      font-size: .92rem;
+      color: #60797e;
+      line-height: 1.7;
+    }
+    .order-list {
+      margin-top: 18px;
+      display: grid;
+      gap: 12px;
+    }
+    .order-item {
+      background: #fff;
+      border: 1px solid #e3ece9;
+      border-radius: 16px;
+      padding: 14px;
+    }
+    .order-item-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-weight: 700;
+      color: #2b5356;
+    }
+    .empty-state {
+      color: #7b8e92;
+      text-align: center;
+      padding: 20px 10px;
+      border: 1px dashed #d8e6e3;
+      border-radius: 16px;
+      background: #fbfefd;
+    }
+    @media (max-width: 1100px) {
+      .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .layout { grid-template-columns: 1fr; }
+      .order-panel { position: static; }
+    }
+    @media (max-width: 720px) {
+      .page { padding: 14px; }
+      .hero { grid-template-columns: 1fr; padding: 20px; }
+      .menu-grid, .actions { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div class="brand">
+        <h1>夏綠坊</h1>
+        <p>把紙本菜單改成可直接操作的線上版點餐頁。</p>
+        <p>營業時間：上午 8 點～下午 6 點</p>
+        <p>地址：嘉義縣梅山鄉中山路 107 號</p>
+        <div class="hero-badges">
+          <span class="badge">外送專線</span>
+          <span class="badge">262-7302</span>
+          <span class="badge">甜度 / 冰量 / 加料可選</span>
+        </div>
+      </div>
+      <div class="contact-card">
+        <h2>立即訂購</h2>
+        <div class="phone">262-7302</div>
+        <p>可先在線上選好飲品，再由店家確認訂單。</p>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="menu-panel">
+        <h2 class="section-title">飲品菜單</h2>
+        <div class="menu-grid" id="menuGrid"></div>
+      </section>
+
+      <aside class="order-panel">
+        <h2 class="section-title">線上訂單</h2>
+        <div class="selected-drink" id="selectedDrinkBox">
+          <h3>尚未選擇飲品</h3>
+          <div>請先從左側菜單點選一個品項。</div>
+        </div>
+
+        <div class="form-block">
+          <label class="block-title">杯型</label>
+          <div class="option-group" id="sizeOptions"></div>
+        </div>
+
+        <div class="form-block">
+          <label class="block-title">甜度</label>
+          <div class="option-group" id="sweetOptions"></div>
+        </div>
+
+        <div class="form-block">
+          <label class="block-title">冰量</label>
+          <div class="option-group" id="iceOptions"></div>
+        </div>
+
+        <div class="form-block">
+          <label class="block-title">加料</label>
+          <div class="addons" id="addonOptions"></div>
+        </div>
+
+        <div class="form-block">
+          <label class="block-title">數量</label>
+          <div class="qty-row"><input id="qtyInput" type="number" min="1" value="1"></div>
+        </div>
+
+        <div class="form-block">
+          <label class="block-title">備註</label>
+          <textarea id="noteInput" placeholder="例如：少冰去冰之間、先做熱飲、外送時間..."></textarea>
+        </div>
+
+        <div class="summary">
+          <div class="summary-row"><span>飲品金額</span><strong id="drinkPrice">$0</strong></div>
+          <div class="summary-row"><span>加料金額</span><strong id="addonPrice">$0</strong></div>
+          <div class="summary-row"><span>杯數</span><strong id="qtyText">1</strong></div>
+          <div class="summary-total"><span>小計</span><span id="subtotalPrice">$0</span></div>
+        </div>
+
+        <div class="actions">
+          <button class="primary" id="addToOrderBtn">加入訂單</button>
+          <button class="secondary" id="resetBtn">清空選擇</button>
+        </div>
+
+        <div class="notice">
+          甜度參考：全糖 10 分、少糖 8 分、半糖 5 分、微糖 3 分、無糖 0 分。<br>
+          冰量參考：正常 10 分、少冰 8 分、微冰 3 分、去冰 0 分。
+        </div>
+
+        <h3 style="margin:22px 0 10px;color:#315e60">已加入的品項</h3>
+        <div id="orderList" class="order-list">
+          <div class="empty-state">目前尚未加入任何飲品。</div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const menuData = [
+      {
+        category: '茗茶系列', color: '#b97a42', sizes: ['M', 'L'], items: [
+          { name: '茉莉綠茶', prices: { M: 20, L: 25 } },
+          { name: '古早味紅茶', prices: { M: 20, L: 25 } },
+          { name: '青茶', prices: { M: 20, L: 25 } },
+          { name: '烏龍青茶', prices: { M: 20, L: 25 } },
+          { name: '烏龍綠茶', prices: { M: 20, L: 25 } },
+          { name: '冬瓜茶', prices: { M: 20, L: 25 } },
+          { name: '冬瓜紅/綠', prices: { M: 20, L: 25 } },
+          { name: '冬瓜青/烏', prices: { M: 20, L: 25 } },
+          { name: '洛神花茶', prices: { M: 20, L: 25 } },
+          { name: '仙草干茶', prices: { M: 20, L: 25 } }
+        ]
+      },
+      {
+        category: '檸檬系列', color: '#35a85d', sizes: ['L'], items: [
+          { name: '檸檬汁', prices: { L: 35 } },
+          { name: '檸檬紅/綠', prices: { L: 40 } },
+          { name: '冬瓜檸檬', prices: { L: 40 } },
+          { name: '梅子檸檬', prices: { L: 40 } },
+          { name: '蜂蜜檸檬', prices: { L: 40 } },
+          { name: '金桔檸檬', prices: { L: 40 } },
+          { name: '凍檸洛神', prices: { L: 40 } }
+        ]
+      },
+      {
+        category: '多多系列', color: '#f08c22', sizes: ['L'], items: [
+          { name: '多多綠茶', prices: { L: 35 } },
+          { name: '香橙多多', prices: { L: 35 } },
+          { name: '百香多多', prices: { L: 35 } },
+          { name: '花多多', prices: { L: 35 } },
+          { name: '檸檬多多', prices: { L: 45 } },
+          { name: '雪碧多多', prices: { L: 45 } }
+        ]
+      },
+      {
+        category: '多酚系列', color: '#3db8b8', sizes: ['L'], items: [
+          { name: '綠茶多酚', prices: { L: 40 } },
+          { name: '檸檬多酚', prices: { L: 45 } },
+          { name: '鮮奶多酚', prices: { L: 45 } }
+        ]
+      },
+      {
+        category: '厚奶系列', color: '#ec5ea7', sizes: ['L'], items: [
+          { name: '厚奶紅茶', prices: { L: 40 } },
+          { name: '厚奶綠茶', prices: { L: 40 } },
+          { name: '厚奶多酚', prices: { L: 50 } },
+          { name: '厚奶檸檬', prices: { L: 50 } }
+        ]
+      },
+      {
+        category: '鮮奶系列', color: '#f07d37', sizes: ['L'], items: [
+          { name: '紅茶鮮奶', prices: { L: 40 } },
+          { name: '冬瓜鮮奶', prices: { L: 40 } },
+          { name: '芋香鮮奶', prices: { L: 40 } }
+        ]
+      },
+      {
+        category: '咖啡系列', color: '#a67a5d', sizes: ['L'], items: [
+          { name: '冰咖啡', prices: { L: 35 } },
+          { name: '焦糖咖啡', prices: { L: 45 } },
+          { name: '榛果咖啡', prices: { L: 45 } }
+        ]
+      },
+      {
+        category: '甘蔗系列', color: '#a4ad13', sizes: ['L'], items: [
+          { name: '甘蔗青茶', prices: { L: 40 } },
+          { name: '甘蔗檸檬', prices: { L: 40 } },
+          { name: '甘蔗冰茶', prices: { L: 45 } },
+          { name: '甘蔗鮮奶', prices: { L: 50 } }
+        ]
+      },
+      {
+        category: '奶香系列', color: '#ee7a2e', sizes: ['M', 'L'], items: [
+          { name: '奶茶/綠/青', prices: { M: 30, L: 35 } },
+          { name: '烏龍奶茶', prices: { M: 30, L: 35 } },
+          { name: '冬瓜奶茶', prices: { M: 30, L: 35 } },
+          { name: '芋香奶茶', prices: { M: 30, L: 35 } },
+          { name: '珍珠奶茶', prices: { M: 35, L: 40 } },
+          { name: '椰果奶茶', prices: { M: 35, L: 40 } },
+          { name: '點子奶茶', prices: { M: 35, L: 40 } },
+          { name: '薄荷奶茶', prices: { M: 35, L: 40 } },
+          { name: '蜂蜜奶茶', prices: { M: 35, L: 40 } },
+          { name: '胚芽奶茶', prices: { M: 35, L: 40 } },
+          { name: '巧克力奶茶', prices: { M: 35, L: 40 } },
+          { name: '焦糖/榛果奶茶', prices: { M: 35, L: 40 } },
+          { name: '阿華田', prices: { M: 35, L: 40 } },
+          { name: '可可亞', prices: { M: 35, L: 40 } },
+          { name: '布丁奶茶', prices: { L: 50 } }
+        ]
+      },
+      {
+        category: '特調系列', color: '#4b57b8', sizes: ['L'], items: [
+          { name: '梅子冰茶', prices: { L: 25 } },
+          { name: '梅子紅/綠', prices: { L: 30 } },
+          { name: '薄荷紅/綠', prices: { L: 35 } },
+          { name: '水蜜桃綠/青', prices: { L: 35 } },
+          { name: '香橙綠茶', prices: { L: 35 } },
+          { name: '百香綠茶', prices: { L: 35 } },
+          { name: '蜂蜜綠茶', prices: { L: 35 } },
+          { name: '紫蘇梅綠茶', prices: { L: 35 } },
+          { name: '洛神蜜', prices: { L: 35 } }
+        ]
+      },
+      {
+        category: '汽泡系列', color: '#3ab7df', sizes: ['L'], items: [
+          { name: '梅子可樂/雪碧', prices: { L: 30 } },
+          { name: '凍檸雪碧', prices: { L: 40 } },
+          { name: '金桔雪碧', prices: { L: 40 } }
+        ]
+      },
+      {
+        category: '冰沙系列', color: '#e55d8a', sizes: ['L'], items: [
+          { name: '百香/柳橙冰沙', prices: { L: 30 } },
+          { name: '酸梅/草莓冰沙', prices: { L: 30 } },
+          { name: '綠豆冰沙', prices: { L: 35 } },
+          { name: '檸檬冰沙', prices: { L: 40 } },
+          { name: '多多冰沙', prices: { L: 40 } },
+          { name: '咖啡冰沙', prices: { L: 40 } },
+          { name: '可可冰沙', prices: { L: 40 } },
+          { name: '阿華田冰沙', prices: { L: 40 } },
+          { name: '巧克力冰沙', prices: { L: 40 } },
+          { name: '綠豆沙鮮奶冰沙', prices: { L: 45 } }
+        ]
+      },
+      {
+        category: '熱飲系列', color: '#d84343', sizes: ['L'], items: [
+          { name: '桂圓紅棗茶', prices: { L: 35 } },
+          { name: '薑母茶', prices: { L: 35 } },
+          { name: '熱咖啡', prices: { L: 35 } },
+          { name: '阿華田', prices: { L: 40 } },
+          { name: '熱可可', prices: { L: 40 } }
+        ]
+      }
+    ];
+
+    const sweetLevels = ['全糖', '少糖', '半糖', '微糖', '無糖'];
+    const iceLevels = ['正常冰', '少冰', '微冰', '去冰'];
+    const addons = [
+      { name: '珍珠', price: 5 },
+      { name: '椰果', price: 5 },
+      { name: '布丁', price: 15 }
+    ];
+
+    const state = {
+      selectedItem: null,
+      selectedSize: null,
+      sweet: '半糖',
+      ice: '正常冰',
+      addons: [],
+      qty: 1,
+      orders: []
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+    const menuGrid = $('#menuGrid');
+    const selectedDrinkBox = $('#selectedDrinkBox');
+    const sizeOptions = $('#sizeOptions');
+    const sweetOptions = $('#sweetOptions');
+    const iceOptions = $('#iceOptions');
+    const addonOptions = $('#addonOptions');
+    const qtyInput = $('#qtyInput');
+    const noteInput = $('#noteInput');
+    const drinkPrice = $('#drinkPrice');
+    const addonPrice = $('#addonPrice');
+    const qtyText = $('#qtyText');
+    const subtotalPrice = $('#subtotalPrice');
+    const orderList = $('#orderList');
+
+    const formatPrice = (v) => '$' + v;
+
+    function renderChips(target, name, options, selected, onChange) {
+      target.innerHTML = options.map(option => `
+        <label class="option-chip">
+          <input type="radio" name="${name}" value="${option}" ${option === selected ? 'checked' : ''}>
+          <span>${option}</span>
+        </label>
+      `).join('');
+
+      target.querySelectorAll(`input[name="${name}"]`).forEach(input => {
+        input.addEventListener('change', e => onChange(e.target.value));
+      });
+    }
+
+    function getBasePrice() {
+      if (!state.selectedItem || !state.selectedSize) return 0;
+      return state.selectedItem.prices[state.selectedSize] || 0;
+    }
+
+    function getAddonPrice() {
+      return addons
+        .filter(addon => state.addons.includes(addon.name))
+        .reduce((sum, addon) => sum + addon.price, 0);
+    }
+
+    function updateSummary() {
+      const base = getBasePrice();
+      const addonTotal = getAddonPrice();
+      const qty = Math.max(1, Number(qtyInput.value) || 1);
+      const subtotal = (base + addonTotal) * qty;
+      state.qty = qty;
+
+      drinkPrice.textContent = formatPrice(base);
+      addonPrice.textContent = formatPrice(addonTotal);
+      qtyText.textContent = qty;
+      subtotalPrice.textContent = formatPrice(subtotal);
+    }
+
+    function renderAddons() {
+      addonOptions.innerHTML = addons.map(addon => `
+        <div class="addon-item">
+          <label>
+            <input type="checkbox" value="${addon.name}" ${state.addons.includes(addon.name) ? 'checked' : ''}>
+            <span>${addon.name}</span>
+          </label>
+          <strong>+${addon.price}</strong>
+        </div>
+      `).join('');
+
+      addonOptions.querySelectorAll('input[type="checkbox"]').forEach(input => {
+        input.addEventListener('change', () => {
+          state.addons = Array.from(addonOptions.querySelectorAll('input[type="checkbox"]:checked')).map(el => el.value);
+          updateSummary();
+        });
+      });
+    }
+
+    function renderSelection() {
+      if (!state.selectedItem) {
+        selectedDrinkBox.innerHTML = '<h3>尚未選擇飲品</h3><div>請先從左側菜單點選一個品項。</div>';
+        sizeOptions.innerHTML = '';
+        updateSummary();
+        return;
+      }
+
+      selectedDrinkBox.innerHTML = `
+        <h3>${state.selectedItem.name}</h3>
+        <div>分類：${state.selectedItem.category}</div>
+        <div style="margin-top:6px;color:#567276">可選杯型：${Object.keys(state.selectedItem.prices).join(' / ')}</div>
+      `;
+
+      renderChips(sizeOptions, 'size', Object.keys(state.selectedItem.prices), state.selectedSize, value => {
+        state.selectedSize = value;
+        updateSummary();
+      });
+      renderChips(sweetOptions, 'sweet', sweetLevels, state.sweet, value => state.sweet = value);
+      renderChips(iceOptions, 'ice', iceLevels, state.ice, value => state.ice = value);
+      renderAddons();
+      updateSummary();
+    }
+
+    function renderMenu() {
+      menuGrid.innerHTML = menuData.map((group, gi) => `
+        <article class="category">
+          <div class="category-header" style="background:${group.color}">
+            <span>${group.category}</span>
+            <span class="sizes">${group.sizes.join(' / ')}</span>
+          </div>
+          <div class="drink-list">
+            ${group.items.map((item, ii) => {
+              const id = `${gi}-${ii}`;
+              const prices = Object.entries(item.prices).map(([size, price]) => `${size} ${price}`).join(' ・ ');
+              return `
+                <button class="drink-btn" data-id="${id}">
+                  <strong>${item.name}</strong>
+                  <div class="price-row">${prices}</div>
+                </button>
+              `;
+            }).join('')}
+          </div>
+        </article>
+      `).join('');
+
+      menuGrid.querySelectorAll('.drink-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          menuGrid.querySelectorAll('.drink-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const [gi, ii] = btn.dataset.id.split('-').map(Number);
+          const group = menuData[gi];
+          const item = group.items[ii];
+          state.selectedItem = { ...item, category: group.category };
+          state.selectedSize = Object.keys(item.prices)[0];
+          state.addons = [];
+          noteInput.value = '';
+          qtyInput.value = 1;
+          renderSelection();
+        });
+      });
+    }
+
+    function renderOrders() {
+      if (!state.orders.length) {
+        orderList.innerHTML = '<div class="empty-state">目前尚未加入任何飲品。</div>';
+        return;
+      }
+
+      orderList.innerHTML = state.orders.map((order, index) => `
+        <div class="order-item">
+          <div class="order-item-header">
+            <span>${index + 1}. ${order.name} (${order.size}) × ${order.qty}</span>
+            <span>${formatPrice(order.subtotal)}</span>
+          </div>
+          <div style="margin-top:8px;color:#5d787d;font-size:.92rem;line-height:1.6">
+            甜度：${order.sweet} ｜ 冰量：${order.ice}<br>
+            加料：${order.addons.length ? order.addons.join('、') : '無'}<br>
+            備註：${order.note || '無'}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function resetSelection() {
+      state.selectedItem = null;
+      state.selectedSize = null;
+      state.sweet = '半糖';
+      state.ice = '正常冰';
+      state.addons = [];
+      qtyInput.value = 1;
+      noteInput.value = '';
+      menuGrid.querySelectorAll('.drink-btn').forEach(b => b.classList.remove('active'));
+      renderSelection();
+      renderChips(sweetOptions, 'sweet', sweetLevels, state.sweet, value => state.sweet = value);
+      renderChips(iceOptions, 'ice', iceLevels, state.ice, value => state.ice = value);
+      renderAddons();
+      updateSummary();
+    }
+
+    qtyInput.addEventListener('input', updateSummary);
+
+    document.getElementById('addToOrderBtn').addEventListener('click', () => {
+      if (!state.selectedItem || !state.selectedSize) {
+        alert('請先選擇飲品與杯型。');
+        return;
+      }
+
+      const qty = Math.max(1, Number(qtyInput.value) || 1);
+      const subtotal = (getBasePrice() + getAddonPrice()) * qty;
+
+      state.orders.push({
+        name: state.selectedItem.name,
+        size: state.selectedSize,
+        qty,
+        sweet: state.sweet,
+        ice: state.ice,
+        addons: [...state.addons],
+        note: noteInput.value.trim(),
+        subtotal
+      });
+
+      renderOrders();
+      resetSelection();
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', resetSelection);
+
+    renderMenu();
+    renderChips(sweetOptions, 'sweet', sweetLevels, state.sweet, value => state.sweet = value);
+    renderChips(iceOptions, 'ice', iceLevels, state.ice, value => state.ice = value);
+    renderAddons();
+    updateSummary();
+  </script>
+</body>
+</html>
+```
+
+你貼上後就可以：
+- 點選飲料
+- 選杯型 / 甜度 / 冰量
+- 勾選珍珠、椰果、布丁
+- 自動算小計
+- 加入多筆訂單
+
+如果你要，我下一步也可以幫你：
+- 再加上「送出訂單」按鈕
+- 串接 Google 表單
+- 串接 LINE 訂購
+- 改得更像原本菜單視覺
